@@ -57,7 +57,7 @@ export default function ProbabilityDashboard({ data }: ProbabilityDashboardProps
                         <Tooltip
                             cursor={{ fill: '#1e293b', opacity: 0.5 }}
                             contentStyle={{ backgroundColor: '#0B0F19', border: '1px solid #334155', borderRadius: '12px', color: '#f8fafc' }}
-                            formatter={(value: number) => [`${value}%`]}
+                            formatter={(value: any) => [`${value}%`]}
                         />
                         <Legend wrapperStyle={{ paddingTop: '20px' }} />
                         <Bar dataKey="expected" name="Expected %" fill="#475569" radius={[4, 4, 0, 0]} />
