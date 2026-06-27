@@ -50,6 +50,8 @@ export default function SpinForm() {
     const [ctYellow, setCtYellow] = useState<string>('');
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    const [isNegativeAdjust, setIsNegativeAdjust] = useState<boolean>(false);
+
     // Auto Save Logic
     const [autoSave, setAutoSave] = useState<boolean>(false);
 
@@ -267,19 +269,18 @@ export default function SpinForm() {
                             <label className="text-xs font-bold text-slate-300 mb-1">Target Segment</label>
                             <div className="flex flex-wrap gap-2">
                                 {SEGMENTS.map(s => {
-                                    const shortName = s.name.replace('Coin Flip', 'CF').replace('Pachinko', 'PACH').replace('Cash Hunt', 'CASH').replace('Crazy Time', 'CT');
                                     return (
                                         <button
                                             key={`ts-seg-${s.name}`}
                                             type="button"
                                             onClick={() => setTopSlotSegment(s.name)}
-                                            className={`relative flex-1 min-w-[45px] h-12 rounded-lg transition-all border ${
+                                            className={`relative flex-1 min-w-[45px] h-12 rounded-lg transition-all border overflow-hidden ${
                                                 topSlotSegment === s.name
-                                                    ? 'bg-blue-900/50 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105'
+                                                    ? 'bg-slate-700 border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)] scale-105 z-10'
                                                     : 'bg-slate-800 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
                                             }`}
                                         >
-                                            <div className="absolute inset-0 p-1 flex items-center justify-center">
+                                            <div className="absolute inset-0 flex items-center justify-center">
                                                 <Image
                                                     src={`/images/${s.id}.png`}
                                                     alt={s.name}
@@ -366,33 +367,49 @@ export default function SpinForm() {
 
             {/* STEP 3: Global Engagement Metrics */}
             <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner">
-                <legend className="sr-only">Step 3: Global Engagement Metrics</legend>
-                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 3: Global Engagement Metrics</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="global-players" className="text-blue-400 text-xs font-bold uppercase">Number of Players</label>
-                            <button type="button" onClick={() => setCrowdPlayers('')} className="text-slate-500 hover:text-white text-xs font-bold transition-colors">CLEAR</button>
+                <legend className="sr-only">Step 3: Global Engagement Metrics Configuration</legend>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest" aria-hidden="true">Step 3: Global Engagement Metrics</h3>
+                    <button 
+                        type="button" 
+                        onClick={() => setIsNegativeAdjust(!isNegativeAdjust)} 
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors border ${isNegativeAdjust ? 'bg-red-900/40 text-red-400 border-red-500/30' : 'bg-blue-900/40 text-blue-400 border-blue-500/30'}`}
+                    >
+                        <span>[+/-] Flip to {isNegativeAdjust ? 'Subtract' : 'Add'}</span>
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Number of Players */}
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="global-players" className="text-blue-400 font-bold text-sm uppercase">Number of Players</label>
+                            <button type="button" onClick={() => setCrowdPlayers('')} className="text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider font-bold">Clear</button>
                         </div>
                         <input id="global-players" type="number" value={crowdPlayers} onChange={e => setCrowdPlayers(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-blue-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none mb-3" placeholder="e.g. 5240" />
                         <div className="flex flex-wrap gap-2">
-                            {[100, 500, 1000, 2000, 5000].map(val => (
-                                <button key={`p-${val}`} type="button" onClick={() => setCrowdPlayers(prev => String((parseInt(prev)||0) + val))} className="bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 text-xs font-bold py-1.5 px-3 rounded border border-blue-800/50 transition-colors">+{val}</button>
+                            {[500, 1000, 2000, 5000, 10000].map(val => (
+                                <button key={`p-${val}`} type="button" onClick={() => setCrowdPlayers(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border-blue-800/50'} text-xs font-bold py-1.5 px-3 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{val >= 1000 ? `${val/1000}k` : val}</button>
                             ))}
                         </div>
                     </div>
 
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="global-total-win" className="text-emerald-400 text-xs font-bold uppercase">Total Win ($)</label>
-                            <button type="button" onClick={() => setCrowdTotalWin('')} className="text-slate-500 hover:text-white text-xs font-bold transition-colors">CLEAR</button>
+                    {/* Total Win */}
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="global-total-win" className="text-emerald-400 font-bold text-sm uppercase">Total Win (₹)</label>
+                            <button type="button" onClick={() => setCrowdTotalWin('')} className="text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider font-bold">Clear</button>
                         </div>
                         <input id="global-total-win" type="number" value={crowdTotalWin} onChange={e => setCrowdTotalWin(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-emerald-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none mb-3" placeholder="e.g. 250000" />
                         <div className="flex flex-wrap gap-2">
-                            {[1000, 5000, 10000, 50000, 100000].map(val => (
-                                <button key={`w-${val}`} type="button" onClick={() => setCrowdTotalWin(prev => String((parseInt(prev)||0) + val))} className="bg-emerald-900/30 hover:bg-emerald-800/50 text-emerald-300 text-xs font-bold py-1.5 px-3 rounded border border-emerald-800/50 transition-colors">+{val >= 1000 ? `${val/1000}k` : val}</button>
-                            ))}
+                            {[100000, 500000, 1000000, 5000000, 10000000].map(val => {
+                                let label = val.toString();
+                                if (val === 10000000) label = '1Cr';
+                                else if (val >= 100000) label = `${val/100000}L`;
+                                return (
+                                    <button key={`w-${val}`} type="button" onClick={() => setCrowdTotalWin(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-emerald-900/30 hover:bg-emerald-800/50 text-emerald-300 border-emerald-800/50'} text-xs font-bold py-1.5 px-3 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{label}</button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -489,13 +506,9 @@ export default function SpinForm() {
 
             {/* Submission Block */}
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-                <div
-                    className="bg-slate-950 border border-slate-700 rounded-xl p-4 flex-1 flex justify-between items-center w-full"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    <span className="text-slate-300 font-bold uppercase text-xs tracking-widest">Calculated Eventual Multiplier</span>
-                    <span className="text-3xl font-black text-white">{finalCalculatedMultiplier}x</span>
+                <div className="flex items-center gap-3 bg-slate-800 rounded-lg p-3 w-full sm:w-auto border border-slate-600">
+                    <span className="text-slate-400 text-xs font-bold uppercase tracking-widest whitespace-nowrap">Average Multiplier for the round:</span>
+                    <span className="text-xl font-black text-white">{finalCalculatedMultiplier}x</span>
                 </div>
                 <button
                     type="submit"
