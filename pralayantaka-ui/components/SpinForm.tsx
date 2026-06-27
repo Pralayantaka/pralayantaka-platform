@@ -417,12 +417,26 @@ export default function SpinForm() {
                                 <input id="cf-blue" type="number" value={cfBlue} onChange={e => setCfBlue(e.target.value)} className="w-full bg-slate-900 border border-blue-800 text-blue-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-slate-800 p-3 rounded-lg">
-                            <label htmlFor="cf-winner" className="text-slate-200 font-bold">Winning Side:</label>
-                            <select id="cf-winner" value={cfWinner} onChange={(e: ChangeEvent<HTMLSelectElement>) => setCfWinner(e.target.value as 'Red' | 'Blue')} className={`flex-1 p-2 rounded font-black focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${cfWinner === 'Red' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
-                                <option value="Red">RED</option>
-                                <option value="Blue">BLUE</option>
-                            </select>
+                        <div className="flex flex-col items-center justify-center bg-slate-800 p-6 rounded-lg">
+                            <span className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-4">Winning Side</span>
+                            <button
+                                type="button"
+                                onClick={() => setCfWinner(prev => prev === 'Red' ? 'Blue' : 'Red')}
+                                className="relative w-24 h-24 rounded-full focus:outline-none focus:ring-4 focus:ring-white/20"
+                                aria-label={`Winning side is ${cfWinner}. Click to flip.`}
+                                style={{ perspective: '1000px' }}
+                            >
+                                <div className="w-full h-full rounded-full transition-transform duration-700 shadow-[0_10px_20px_rgba(0,0,0,0.5)]" style={{ transformStyle: 'preserve-3d', transform: cfWinner === 'Blue' ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
+                                    {/* Red Side (Front) */}
+                                    <div className="absolute w-full h-full rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center border-[6px] border-red-300/50" style={{ backfaceVisibility: 'hidden' }}>
+                                        <span className="text-white font-black text-xl drop-shadow-md">RED</span>
+                                    </div>
+                                    {/* Blue Side (Back) */}
+                                    <div className="absolute w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center border-[6px] border-blue-300/50" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                                        <span className="text-white font-black text-xl drop-shadow-md">BLUE</span>
+                                    </div>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 )}
