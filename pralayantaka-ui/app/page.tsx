@@ -1,8 +1,8 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api'; // Updated path
-import SpinForm from '../components/SpinForm'; // Updated path
-
+import { api } from '../lib/api';
+import SpinForm from '../components/SpinForm';
+import FrequencyChart from '../components/FrequencyChart';
 
 interface SpinRecord {
     id: number;
@@ -44,7 +44,7 @@ export default function Home() {
                     <SpinForm />
                 </section>
 
-                {/* Data Grid Section */}
+                {/* Data Section */}
                 <section className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-bold text-white">Recent Outcomes</h2>
@@ -58,35 +58,42 @@ export default function Home() {
                             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {data?.map((spin) => (
-                                <div key={spin.id} className="relative group bg-slate-800/40 hover:bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(79,70,229,0.15)] hover:-translate-y-1 overflow-hidden">
+                        <div className="space-y-8">
 
-                                    {/* Ambient Glow Effect on Hover */}
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all duration-500 group-hover:bg-blue-500/20"></div>
+                            {/* NEW: Analytics Chart */}
+                            <FrequencyChart data={data} />
 
-                                    <div className="flex justify-between items-start mb-6">
-                                        <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-                                            {spin.gameType}
-                                        </span>
-                                        <span className="px-2 py-1 text-[10px] font-bold rounded bg-slate-900 border border-slate-700 text-slate-500">
-                                            ID: {spin.id}
-                                        </span>
+                            {/* Data Grid Section */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {data?.map((spin) => (
+                                    <div key={spin.id} className="relative group bg-slate-800/40 hover:bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(79,70,229,0.15)] hover:-translate-y-1 overflow-hidden">
+
+                                        {/* Ambient Glow Effect on Hover */}
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all duration-500 group-hover:bg-blue-500/20"></div>
+
+                                        <div className="flex justify-between items-start mb-6">
+                                            <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                                                {spin.gameType}
+                                            </span>
+                                            <span className="px-2 py-1 text-[10px] font-bold rounded bg-slate-900 border border-slate-700 text-slate-500">
+                                                ID: {spin.id}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-6xl font-black text-white tracking-tighter drop-shadow-md">
+                                                {spin.finalMultiplier}
+                                            </span>
+                                            <span className="text-2xl font-bold text-blue-400">x</span>
+                                        </div>
+
+                                        <div className="mt-6 pt-4 border-t border-slate-700/50 flex justify-between items-center text-sm font-medium">
+                                            <span className="text-slate-500">Segment</span>
+                                            <span className="text-slate-300">{spin.result}</span>
+                                        </div>
                                     </div>
-
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-6xl font-black text-white tracking-tighter drop-shadow-md">
-                                            {spin.finalMultiplier}
-                                        </span>
-                                        <span className="text-2xl font-bold text-blue-400">x</span>
-                                    </div>
-
-                                    <div className="mt-6 pt-4 border-t border-slate-700/50 flex justify-between items-center text-sm font-medium">
-                                        <span className="text-slate-500">Segment</span>
-                                        <span className="text-slate-300">{spin.result}</span>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
                 </section>
