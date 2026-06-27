@@ -293,16 +293,57 @@ export default function SpinForm() {
                 </div>
             </fieldset>
 
-            {/* STEP 3: Dynamic Resolution Board */}
+            {/* STEP 3: Global Engagement Metrics */}
             <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner">
-                <legend className="sr-only">Step 3: Outcome Resolution Configuration</legend>
-                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 3: Outcome Resolution</h3>
+                <legend className="sr-only">Step 3: Global Engagement Metrics</legend>
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 3: Global Engagement Metrics</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <label htmlFor="global-players" className="text-blue-400 text-xs font-bold uppercase">Number of Players</label>
+                            <button type="button" onClick={() => setCrowdPlayers('')} className="text-slate-500 hover:text-white text-xs font-bold transition-colors">CLEAR</button>
+                        </div>
+                        <input id="global-players" type="number" value={crowdPlayers} onChange={e => setCrowdPlayers(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-blue-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none mb-3" placeholder="e.g. 5240" />
+                        <div className="flex flex-wrap gap-2">
+                            {[100, 500, 1000, 2000, 5000].map(val => (
+                                <button key={`p-${val}`} type="button" onClick={() => setCrowdPlayers(prev => String((parseInt(prev)||0) + val))} className="bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 text-xs font-bold py-1.5 px-3 rounded border border-blue-800/50 transition-colors">+{val}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <label htmlFor="global-total-win" className="text-emerald-400 text-xs font-bold uppercase">Total Win ($)</label>
+                            <button type="button" onClick={() => setCrowdTotalWin('')} className="text-slate-500 hover:text-white text-xs font-bold transition-colors">CLEAR</button>
+                        </div>
+                        <input id="global-total-win" type="number" value={crowdTotalWin} onChange={e => setCrowdTotalWin(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-emerald-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none mb-3" placeholder="e.g. 250000" />
+                        <div className="flex flex-wrap gap-2">
+                            {[1000, 5000, 10000, 50000, 100000].map(val => (
+                                <button key={`w-${val}`} type="button" onClick={() => setCrowdTotalWin(prev => String((parseInt(prev)||0) + val))} className="bg-emerald-900/30 hover:bg-emerald-800/50 text-emerald-300 text-xs font-bold py-1.5 px-3 rounded border border-emerald-800/50 transition-colors">+{val >= 1000 ? `${val/1000}k` : val}</button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            {/* STEP 4: Dynamic Resolution Board */}
+            <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner mt-6">
+                <legend className="sr-only">Step 4: Outcome Resolution Configuration</legend>
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 4: Outcome Resolution</h3>
 
                 {/* Logic 1: Numbers */}
                 {currentSegmentType === 'number' && (
-                    <div className="flex items-center gap-4">
-                        <label htmlFor="num-payout" className="text-slate-200 font-bold w-1/3">Eventual Multiplier</label>
-                        <input id="num-payout" type="number" value={numPayout} onChange={e => setNumPayout(e.target.value)} className="flex-1 bg-slate-800 border border-slate-600 text-white p-3 rounded-lg font-black text-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" />
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <label htmlFor="num-payout" className="text-slate-200 font-bold w-1/3">Eventual Multiplier</label>
+                            <input id="num-payout" type="number" value={numPayout} onChange={e => setNumPayout(e.target.value)} className="flex-1 bg-slate-800 border border-slate-600 text-white p-3 rounded-lg font-black text-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" />
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-2">
+                            {[1, 2, 5, 10, 20, 50, 100].map(val => (
+                                <button key={`num-payout-${val}`} type="button" onClick={() => setNumPayout(String(val))} className="bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-bold py-1.5 px-3 rounded border border-slate-600 hover:border-blue-500 transition-colors">{val}x</button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -350,16 +391,6 @@ export default function SpinForm() {
                             <label htmlFor="ch-highest" className="text-slate-300 text-xs font-bold uppercase block mb-2">Highest Possible</label>
                             <input id="ch-highest" type="number" value={chHighest} onChange={e => setChHighest(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-slate-100 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4 bg-emerald-950/30 p-4 rounded-lg border border-emerald-900/50">
-                            <div>
-                                <label htmlFor="ch-total-win" className="text-emerald-400 text-xs font-bold uppercase block mb-2">Total Win</label>
-                                <input id="ch-total-win" type="number" value={crowdTotalWin} onChange={e => setCrowdTotalWin(e.target.value)} className="w-full bg-slate-900 border border-emerald-800 text-emerald-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none" />
-                            </div>
-                            <div>
-                                <label htmlFor="ch-players" className="text-emerald-400 text-xs font-bold uppercase block mb-2">Number of Players</label>
-                                <input id="ch-players" type="number" value={crowdPlayers} onChange={e => setCrowdPlayers(e.target.value)} className="w-full bg-slate-900 border border-emerald-800 text-emerald-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none" />
-                            </div>
-                        </div>
                     </div>
                 )}
 
@@ -378,16 +409,6 @@ export default function SpinForm() {
                             <div className="bg-yellow-950/30 p-2 rounded-lg border border-yellow-900/50">
                                 <label htmlFor="ct-yellow" className="text-yellow-400 text-[10px] font-black uppercase block mb-1">Yellow</label>
                                 <input id="ct-yellow" type="number" value={ctYellow} onChange={e => setCtYellow(e.target.value)} className="w-full bg-slate-900 border border-yellow-800 text-yellow-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:outline-none" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 bg-rose-950/30 p-4 rounded-lg border border-rose-900/50">
-                            <div>
-                                <label htmlFor="ct-total-win" className="text-rose-400 text-xs font-bold uppercase block mb-2">Total Win</label>
-                                <input id="ct-total-win" type="number" value={crowdTotalWin} onChange={e => setCrowdTotalWin(e.target.value)} className="w-full bg-slate-900 border border-rose-800 text-rose-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:outline-none" />
-                            </div>
-                            <div>
-                                <label htmlFor="ct-players" className="text-rose-400 text-xs font-bold uppercase block mb-2">Number of Players</label>
-                                <input id="ct-players" type="number" value={crowdPlayers} onChange={e => setCrowdPlayers(e.target.value)} className="w-full bg-slate-900 border border-rose-800 text-rose-400 p-2 rounded font-bold focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:outline-none" />
                             </div>
                         </div>
                     </div>
