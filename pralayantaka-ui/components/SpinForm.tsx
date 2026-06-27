@@ -50,6 +50,7 @@ export default function SpinForm() {
     const [ctYellow, setCtYellow] = useState<string>('');
 
     const [finalCalculatedMultiplier, setFinalCalculatedMultiplier] = useState<number>(1);
+    const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     useEffect(() => {
         const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
@@ -79,19 +80,64 @@ export default function SpinForm() {
         setFinalCalculatedMultiplier(eventual);
     }, [selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, numPayout, cfRed, cfBlue, cfWinner, pchEventual, crowdTotalWin, crowdPlayers]);
 
+    const buildGameSpecificData = () => {
+        const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
+        if (!segmentData) return null;
+
+        switch (segmentData.type) {
+            case 'coin-flip':
+                return JSON.stringify({
+                    redMultiplier: parseFloat(cfRed) || 0,
+                    blueMultiplier: parseFloat(cfBlue) || 0,
+                    winner: cfWinner,
+                });
+            case 'pachinko':
+                return JSON.stringify({
+                    highestAvailable: parseFloat(pchHighest) || 0,
+                    eventualMultiplier: parseFloat(pchEventual) || 0,
+                });
+            case 'cash-hunt':
+                return JSON.stringify({
+                    highestPossible: parseFloat(chHighest) || 0,
+                    totalWin: parseFloat(crowdTotalWin) || 0,
+                    numberOfPlayers: parseInt(crowdPlayers, 10) || 0,
+                });
+            case 'crazy-time':
+                return JSON.stringify({
+                    greenFlap: parseFloat(ctGreen) || 0,
+                    blueFlap: parseFloat(ctBlue) || 0,
+                    yellowFlap: parseFloat(ctYellow) || 0,
+                    totalWin: parseFloat(crowdTotalWin) || 0,
+                    numberOfPlayers: parseInt(crowdPlayers, 10) || 0,
+                });
+            default:
+                return null;
+        }
+    };
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!selectedSegment || finalCalculatedMultiplier <= 0) return;
 
         setIsSubmitting(true);
+        setNotification(null);
         try {
             await api.post('/spins', {
                 userEmail: "architect@pralayantaka.com",
                 gameType: "Crazy Time",
-                finalMultiplier: finalCalculatedMultiplier,
+                topSlotSegment: isTopSlotActive ? topSlotSegment : null,
+                topSlotMultiplier: isTopSlotActive ? (parseFloat(topSlotMultiplier) || null) : null,
                 result: selectedSegment,
+                finalMultiplier: finalCalculatedMultiplier,
+                numberOfPlayers: parseInt(crowdPlayers, 10) || 0,
+                totalWinningAmount: parseFloat(crowdTotalWin) || 0,
+                gameSpecificData: buildGameSpecificData(),
             });
 
+            setNotification({ type: 'success', message: `Round logged: ${selectedSegment} @ ${finalCalculatedMultiplier}x` });
+            setTimeout(() => setNotification(null), 3000);
+
+            // Reset all fields
             setSelectedSegment('1');
             setIsTopSlotActive(false);
             setTopSlotMultiplier('');
@@ -101,6 +147,7 @@ export default function SpinForm() {
             setCrowdTotalWin(''); setCrowdPlayers(''); setChHighest('');
             setCtGreen(''); setCtBlue(''); setCtYellow('');
         } catch (error) {
+            setNotification({ type: 'error', message: 'Failed to save spin. Check your connection.' });
             console.error('Error saving spin:', error);
         } finally {
             setIsSubmitting(false);
@@ -111,6 +158,18 @@ export default function SpinForm() {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 bg-slate-800/40 backdrop-blur-md rounded-2xl border border-slate-700 shadow-xl" aria-label="Game Result Entry Form">
+
+            {/* Notification Banner */}
+            {notification && (
+                <div className={`flex items-center gap-3 p-4 rounded-xl border text-sm font-bold transition-all duration-300 ${
+                    notification.type === 'success'
+                        ? 'bg-emerald-950/50 border-emerald-500/30 text-emerald-400'
+                        : 'bg-red-950/50 border-red-500/30 text-red-400'
+                }`}>
+                    <span>{notification.type === 'success' ? '✓' : '✕'}</span>
+                    <span>{notification.message}</span>
+                </div>
+            )}
 
             {/* STEP 1: Top Slot Engine */}
             <fieldset className="bg-slate-900/80 rounded-xl p-4 border border-slate-700/80">
