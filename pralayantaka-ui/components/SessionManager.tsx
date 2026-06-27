@@ -18,9 +18,11 @@ export default function SessionManager({ data }: SessionManagerProps) {
 
     useEffect(() => {
         const savedCurrent = localStorage.getItem('pralayantaka_current_session');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (savedCurrent) setCurrentSession(JSON.parse(savedCurrent));
         
         const savedHistory = localStorage.getItem('pralayantaka_session_history');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (savedHistory) setSessionHistory(JSON.parse(savedHistory));
     }, []);
 
