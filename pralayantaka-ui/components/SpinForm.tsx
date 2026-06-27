@@ -1,7 +1,8 @@
 'use client';
-import { useState, useMemo, FormEvent, ChangeEvent } from 'react';
+import { useState, useMemo, useEffect, FormEvent, ChangeEvent } from 'react';
 import { api } from '../lib/api';
 import Image from 'next/image';
+import { RefreshCcw, Save, ExternalLink, Trash2 } from 'lucide-react';
 
 type SegmentType = 'number' | 'coin-flip' | 'pachinko' | 'cash-hunt' | 'crazy-time';
 
@@ -49,6 +50,65 @@ export default function SpinForm() {
     const [ctBlue, setCtBlue] = useState<string>('');
     const [ctYellow, setCtYellow] = useState<string>('');
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    // Auto Save Logic
+    const [autoSave, setAutoSave] = useState<boolean>(false);
+
+    useEffect(() => {
+        const savedDraft = localStorage.getItem('pralayantaka_draft');
+        if (savedDraft) {
+            try {
+                const parsed = JSON.parse(savedDraft);
+                setSelectedSegment(parsed.selectedSegment || '1');
+                setIsTopSlotActive(parsed.isTopSlotActive || false);
+                setTopSlotSegment(parsed.topSlotSegment || '1');
+                setTopSlotMultiplier(parsed.topSlotMultiplier || '');
+                setNumPayout(parsed.numPayout || '1');
+                setCfRed(parsed.cfRed || '');
+                setCfBlue(parsed.cfBlue || '');
+                setCfWinner(parsed.cfWinner || 'Red');
+                setPchHighest(parsed.pchHighest || '');
+                setPchEventual(parsed.pchEventual || '');
+                setCrowdTotalWin(parsed.crowdTotalWin || '');
+                setCrowdPlayers(parsed.crowdPlayers || '');
+                setChHighest(parsed.chHighest || '');
+                setCtGreen(parsed.ctGreen || '');
+                setCtBlue(parsed.ctBlue || '');
+                setCtYellow(parsed.ctYellow || '');
+                setAutoSave(true);
+            } catch (e) {
+                console.error("Failed to parse draft", e);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (autoSave) {
+            const draft = {
+                selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier,
+                numPayout, cfRed, cfBlue, cfWinner, pchHighest, pchEventual,
+                crowdTotalWin, crowdPlayers, chHighest, ctGreen, ctBlue, ctYellow
+            };
+            localStorage.setItem('pralayantaka_draft', JSON.stringify(draft));
+        } else {
+            localStorage.removeItem('pralayantaka_draft');
+        }
+    }, [autoSave, selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, numPayout, cfRed, cfBlue, cfWinner, pchHighest, pchEventual, crowdTotalWin, crowdPlayers, chHighest, ctGreen, ctBlue, ctYellow]);
+
+    const handleClearEntry = () => {
+        setSelectedSegment('1');
+        setIsTopSlotActive(false);
+        setTopSlotMultiplier('');
+        setNumPayout('1');
+        setCfRed(''); setCfBlue('');
+        setPchHighest(''); setPchEventual('');
+        setCrowdTotalWin(''); setCrowdPlayers(''); setChHighest('');
+        setCtGreen(''); setCtBlue(''); setCtYellow('');
+        if (autoSave) {
+            localStorage.removeItem('pralayantaka_draft');
+        }
+    };
+
 
     const finalCalculatedMultiplier = useMemo(() => {
         const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
@@ -137,13 +197,7 @@ export default function SpinForm() {
 
             // Reset all fields
             setSelectedSegment('1');
-            setIsTopSlotActive(false);
-            setTopSlotMultiplier('');
-            setNumPayout('1');
-            setCfRed(''); setCfBlue('');
-            setPchHighest(''); setPchEventual('');
-            setCrowdTotalWin(''); setCrowdPlayers(''); setChHighest('');
-            setCtGreen(''); setCtBlue(''); setCtYellow('');
+            handleClearEntry();
         } catch (error) {
             setNotification({ type: 'error', message: 'Failed to save spin. Check your connection.' });
             console.error('Error saving spin:', error);
@@ -156,6 +210,29 @@ export default function SpinForm() {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 bg-slate-800/40 backdrop-blur-md rounded-2xl border border-slate-700 shadow-xl" aria-label="Game Result Entry Form">
+
+            {/* Utility Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-700/50">
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" className="sr-only" checked={autoSave} onChange={(e) => setAutoSave(e.target.checked)} />
+                        <div className={`w-10 h-5 rounded-full p-1 transition-colors ${autoSave ? 'bg-blue-500' : 'bg-slate-700 group-hover:bg-slate-600'}`}>
+                            <div className={`bg-white w-3 h-3 rounded-full shadow-sm transition-transform ${autoSave ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        </div>
+                        <span className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1">
+                            <Save className="w-3 h-3" /> Auto-Save Draft
+                        </span>
+                    </label>
+                </div>
+                <div className="flex gap-2">
+                    <button type="button" onClick={handleClearEntry} className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-xs font-bold transition-colors border border-red-500/20">
+                        <Trash2 className="w-3 h-3" /> Clear Form
+                    </button>
+                    <button type="button" onClick={() => window.open(window.location.href, '_blank')} className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 rounded-lg text-xs font-bold transition-colors border border-slate-600/50">
+                        <ExternalLink className="w-3 h-3" /> Popout
+                    </button>
+                </div>
+            </div>
 
             {/* Notification Banner */}
             {notification && (
