@@ -1,14 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-
-interface SpinRecord {
-    id: number;
-    gameType: string;
-    result: string;
-    finalMultiplier: number;
-    timestamp: string;
-}
+import type { SpinRecord } from '../lib/types';
 
 interface FrequencyChartProps {
     data: SpinRecord[] | undefined;

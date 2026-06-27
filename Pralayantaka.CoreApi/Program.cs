@@ -3,12 +3,13 @@ using Pralayantaka.CoreApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ADD THESE TWO LINES: Force the app to listen on Railway's dynamic port
+// Force the app to listen on Railway's dynamic port
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// 1. Configure the Isolated PostgreSQL Connection
-var connectionString = builder.Configuration.GetConnectionString("CoreConnection");
+// 1. Configure PostgreSQL Connection (env var takes priority over appsettings)
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("CoreConnection");
 builder.Services.AddDbContext<CoreDbContext>(options =>
     options.UseNpgsql(connectionString));
 
