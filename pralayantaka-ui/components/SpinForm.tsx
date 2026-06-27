@@ -202,13 +202,21 @@ export default function SpinForm() {
                                             key={`ts-seg-${s.name}`}
                                             type="button"
                                             onClick={() => setTopSlotSegment(s.name)}
-                                            className={`flex-1 min-w-[45px] py-2 rounded-lg font-black text-xs transition-all border ${
+                                            className={`relative flex-1 min-w-[45px] h-12 rounded-lg transition-all border ${
                                                 topSlotSegment === s.name
-                                                    ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105'
-                                                    : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
+                                                    ? 'bg-blue-900/50 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105'
+                                                    : 'bg-slate-800 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
                                             }`}
                                         >
-                                            {shortName}
+                                            <div className="absolute inset-0 p-1 flex items-center justify-center">
+                                                <Image
+                                                    src={`/images/${s.id}.png`}
+                                                    alt={s.name}
+                                                    fill sizes="10vw"
+                                                    className={`object-contain transition-opacity ${topSlotSegment === s.name ? 'opacity-100' : 'opacity-60'}`}
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                />
+                                            </div>
                                         </button>
                                     );
                                 })}
