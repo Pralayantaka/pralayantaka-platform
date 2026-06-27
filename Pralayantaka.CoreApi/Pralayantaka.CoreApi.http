@@ -1,0 +1,21 @@
+@HostAddress = http://localhost:5027
+
+### Fetch all spins
+GET {{HostAddress}}/api/spins
+Accept: application/json
+
+### Add a new Crazy Time record
+POST {{HostAddress}}/api/spins
+Content-Type: application/json
+
+{
+  "userEmail": "architect@pralayantaka.com",
+  "gameType": "Crazy Time",
+  "topSlotSegment": "10",
+  "topSlotMultiplier": 5,
+  "result": "Crazy Time",
+  "finalMultiplier": 250,
+  "numberOfPlayers": 1500,
+  "totalWinningAmount": 250000,
+  "gameSpecificData": "{\"GreenFlapper\": 100, \"BlueFlapper\": 250, \"YellowFlapper\": 500}"
+}
