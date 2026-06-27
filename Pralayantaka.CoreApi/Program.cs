@@ -8,12 +8,12 @@ var connectionString = builder.Configuration.GetConnectionString("CoreConnection
 builder.Services.AddDbContext<CoreDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. Configure CORS for the Next.js Frontend
+// 2. Configure CORS for Production Demo (Allows cloud frontend to connect)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextJs", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -30,8 +30,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowNextJs");
+
+// 3. Apply the updated CORS policy
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
