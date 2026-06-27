@@ -193,15 +193,26 @@ export default function SpinForm() {
                 {isTopSlotActive && (
                     <div className="flex flex-col gap-4 mt-4">
                         <div className="flex flex-col gap-1">
-                            <label htmlFor="top-slot-segment" className="text-xs font-bold text-slate-300">Target Segment</label>
-                            <select
-                                id="top-slot-segment"
-                                value={topSlotSegment}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) => setTopSlotSegment(e.target.value)}
-                                className="bg-slate-800 border border-slate-600 text-white p-3 rounded-lg focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:outline-none font-bold"
-                            >
-                                {SEGMENTS.map(s => <option key={`ts-${s.name}`} value={s.name}>{s.name}</option>)}
-                            </select>
+                            <label className="text-xs font-bold text-slate-300 mb-1">Target Segment</label>
+                            <div className="flex flex-wrap gap-2">
+                                {SEGMENTS.map(s => {
+                                    const shortName = s.name.replace('Coin Flip', 'CF').replace('Pachinko', 'PACH').replace('Cash Hunt', 'CASH').replace('Crazy Time', 'CT');
+                                    return (
+                                        <button
+                                            key={`ts-seg-${s.name}`}
+                                            type="button"
+                                            onClick={() => setTopSlotSegment(s.name)}
+                                            className={`flex-1 min-w-[45px] py-2 rounded-lg font-black text-xs transition-all border ${
+                                                topSlotSegment === s.name
+                                                    ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105'
+                                                    : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
+                                            }`}
+                                        >
+                                            {shortName}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-bold text-slate-300 mb-1">Multiplier Value</label>
@@ -239,11 +250,11 @@ export default function SpinForm() {
                                 role="radio"
                                 aria-checked={isActive}
                                 onClick={() => setSelectedSegment(segment.name)}
-                                className={`relative overflow-hidden group rounded-xl border-2 transition-all duration-300 h-20 flex items-center justify-center bg-slate-900 focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:outline-none
+                                className={`relative overflow-hidden group rounded-xl border-2 transition-all duration-300 h-20 flex items-center justify-center bg-transparent focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:outline-none
                                     ${isActive ? `${segment.color} shadow-[0_0_20px_rgba(0,0,0,0.5)] ${segment.shadow} scale-105` : 'border-slate-700/50 hover:border-slate-500'}
                                 `}
                             >
-                                <div className="z-10 absolute inset-0 p-2 flex items-center justify-center">
+                                <div className="z-10 absolute inset-0 flex items-center justify-center">
                                     <Image
                                         src={`/images/${segment.id}.png`}
                                         alt={`Select ${segment.name}`}
