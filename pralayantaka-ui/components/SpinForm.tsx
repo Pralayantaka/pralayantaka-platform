@@ -193,7 +193,7 @@ export default function SpinForm() {
                 </div>
 
                 {isTopSlotActive && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-4 mt-4">
                         <div className="flex flex-col gap-1">
                             <label htmlFor="top-slot-segment" className="text-xs font-bold text-slate-300">Target Segment</label>
                             <select
@@ -205,18 +205,24 @@ export default function SpinForm() {
                                 {SEGMENTS.map(s => <option key={`ts-${s.name}`} value={s.name}>{s.name}</option>)}
                             </select>
                         </div>
-                        <div className="flex flex-col gap-1 relative">
-                            <label htmlFor="top-slot-multiplier" className="text-xs font-bold text-slate-300">Multiplier Value</label>
-                            <input
-                                id="top-slot-multiplier"
-                                type="number"
-                                value={topSlotMultiplier}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => setTopSlotMultiplier(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-600 text-yellow-400 p-3 pl-4 pr-8 rounded-lg focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:outline-none font-black"
-                                placeholder="0"
-                                aria-label="Enter Top Slot Multiplier"
-                            />
-                            <span className="absolute right-3 bottom-3 text-yellow-500 font-bold" aria-hidden="true">x</span>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-bold text-slate-300 mb-1">Multiplier Value</label>
+                            <div className="flex flex-wrap gap-2">
+                                {[2, 3, 4, 5, 7, 10, 15, 20, 25, 50].map((mult) => (
+                                    <button
+                                        key={`ts-mult-${mult}`}
+                                        type="button"
+                                        onClick={() => setTopSlotMultiplier(mult.toString())}
+                                        className={`flex-1 min-w-[45px] py-2 rounded-lg font-black text-sm transition-all border ${
+                                            topSlotMultiplier === mult.toString()
+                                                ? 'bg-yellow-500 text-slate-900 border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.5)] scale-105'
+                                                : 'bg-slate-800 text-yellow-500 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
+                                        }`}
+                                    >
+                                        {mult}x
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}
