@@ -243,6 +243,18 @@ export default function SpinForm() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {SEGMENTS.map((segment) => {
                         const isActive = selectedSegment === segment.name;
+                        
+                        const GLOW_COLORS: Record<string, string> = {
+                            '1': 'rgba(59, 130, 246, 0.8)', // blue
+                            '2': 'rgba(234, 179, 8, 0.8)', // yellow
+                            '5': 'rgba(236, 72, 153, 0.8)', // pink
+                            '10': 'rgba(168, 85, 247, 0.8)', // purple
+                            'Coin Flip': 'rgba(239, 68, 68, 0.8)', // red
+                            'Pachinko': 'rgba(217, 70, 239, 0.8)', // fuchsia
+                            'Cash Hunt': 'rgba(16, 185, 129, 0.8)', // emerald
+                            'Crazy Time': 'rgba(225, 29, 72, 0.8)', // rose
+                        };
+
                         return (
                             <button
                                 key={segment.name}
@@ -250,8 +262,8 @@ export default function SpinForm() {
                                 role="radio"
                                 aria-checked={isActive}
                                 onClick={() => setSelectedSegment(segment.name)}
-                                className={`relative overflow-hidden group rounded-xl border-2 transition-all duration-300 h-20 flex items-center justify-center bg-transparent focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:outline-none
-                                    ${isActive ? `${segment.color} shadow-[0_0_20px_rgba(0,0,0,0.5)] ${segment.shadow} scale-105` : 'border-slate-700/50 hover:border-slate-500'}
+                                className={`relative group rounded-xl transition-all duration-300 aspect-[2/1] flex items-center justify-center bg-transparent focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:outline-none
+                                    ${isActive ? 'scale-110 z-10' : 'scale-100 opacity-60 hover:opacity-100 hover:scale-105'}
                                 `}
                             >
                                 <div className="z-10 absolute inset-0 flex items-center justify-center">
@@ -259,7 +271,11 @@ export default function SpinForm() {
                                         src={`/images/${segment.id}.png`}
                                         alt={`Select ${segment.name}`}
                                         fill sizes="25vw"
-                                        className={`object-contain transition-transform duration-300 ${isActive ? 'scale-110' : 'opacity-60 group-hover:opacity-100'}`}
+                                        className="object-contain"
+                                        style={{
+                                            filter: isActive ? `drop-shadow(0 0 15px ${GLOW_COLORS[segment.name]})` : 'none',
+                                            transition: 'filter 0.3s ease-in-out'
+                                        }}
                                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
                                 </div>
