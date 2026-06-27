@@ -13,7 +13,7 @@ if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("post
     // Parse Railway's postgres:// or postgresql:// URL
     var uri = new Uri(connectionString);
     var userInfo = uri.UserInfo.Split(':');
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Disable;";
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Require;Trust Server Certificate=true;";
 }
 else
 {
