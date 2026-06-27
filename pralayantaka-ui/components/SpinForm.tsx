@@ -1,49 +1,82 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { api } from '../lib/api';
+import Image from 'next/image';
 
-const SEGMENTS = [
-    { name: '1', type: 'number', baseMultiplier: 1, defaultColor: 'text-blue-400 border-blue-400/30 hover:bg-blue-400/10', activeColor: 'bg-blue-500 text-white border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]' },
-    { name: '2', type: 'number', baseMultiplier: 2, defaultColor: 'text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/10', activeColor: 'bg-yellow-500 text-slate-900 border-yellow-500 font-black shadow-[0_0_15px_rgba(234,179,8,0.4)]' },
-    { name: '5', type: 'number', baseMultiplier: 5, defaultColor: 'text-pink-400 border-pink-400/30 hover:bg-pink-400/10', activeColor: 'bg-pink-500 text-white border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]' },
-    { name: '10', type: 'number', baseMultiplier: 10, defaultColor: 'text-purple-400 border-purple-400/30 hover:bg-purple-400/10', activeColor: 'bg-purple-500 text-white border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]' },
-    { name: 'Coin Flip', type: 'bonus', defaultColor: 'text-red-400 border-red-400/30 hover:bg-red-400/10', activeColor: 'bg-red-500 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' },
-    { name: 'Pachinko', type: 'bonus', defaultColor: 'text-fuchsia-400 border-fuchsia-400/30 hover:bg-fuchsia-400/10', activeColor: 'bg-fuchsia-500 text-white border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.4)]' },
-    { name: 'Cash Hunt', type: 'bonus', defaultColor: 'text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10', activeColor: 'bg-emerald-500 text-white border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' },
-    { name: 'Crazy Time', type: 'bonus', defaultColor: 'text-rose-500 border-rose-500/30 hover:bg-rose-500/10', activeColor: 'bg-rose-600 text-white border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.6)]' },
+// 1. Explicitly define the types to satisfy Strict Mode
+type SegmentType = 'number' | 'bonus';
+
+interface Segment {
+    name: string;
+    id: string;
+    type: SegmentType;
+    baseMultiplier: number;
+    color: string;
+    shadow: string;
+}
+
+const SEGMENTS: Segment[] = [
+    { name: '1', id: '1', type: 'number', baseMultiplier: 1, color: 'border-blue-500', shadow: 'shadow-blue-500/50' },
+    { name: '2', id: '2', type: 'number', baseMultiplier: 2, color: 'border-yellow-500', shadow: 'shadow-yellow-500/50' },
+    { name: '5', id: '5', type: 'number', baseMultiplier: 5, color: 'border-pink-500', shadow: 'shadow-pink-500/50' },
+    { name: '10', id: '10', type: 'number', baseMultiplier: 10, color: 'border-purple-500', shadow: 'shadow-purple-500/50' },
+    { name: 'Coin Flip', id: 'coin-flip', type: 'bonus', baseMultiplier: 1, color: 'border-red-500', shadow: 'shadow-red-500/50' },
+    { name: 'Pachinko', id: 'pachinko', type: 'bonus', baseMultiplier: 1, color: 'border-fuchsia-500', shadow: 'shadow-fuchsia-500/50' },
+    { name: 'Cash Hunt', id: 'cash-hunt', type: 'bonus', baseMultiplier: 1, color: 'border-emerald-500', shadow: 'shadow-emerald-500/50' },
+    { name: 'Crazy Time', id: 'crazy-time', type: 'bonus', baseMultiplier: 1, color: 'border-rose-600', shadow: 'shadow-rose-600/50' },
 ];
 
 export default function SpinForm() {
+    // Top Slot State
+    const [isTopSlotActive, setIsTopSlotActive] = useState<boolean>(false);
+    const [topSlotSegment, setTopSlotSegment] = useState<string>('1');
+    const [topSlotMultiplier, setTopSlotMultiplier] = useState<string>('50');
+
+    // Main Spin State
     const [selectedSegment, setSelectedSegment] = useState<string>('1');
-    const [multiplier, setMultiplier] = useState<string>('1');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [finalPayout, setFinalPayout] = useState<string>('1');
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    const handleSegmentSelect = (segment: typeof SEGMENTS[0]) => {
-        setSelectedSegment(segment.name);
-        // Auto-fill multiplier for numbers, clear for bonuses (unless Top Slot applies, user can manually edit)
-        if (segment.type === 'number') {
-            setMultiplier(segment.baseMultiplier!.toString());
+    // Auto-Calculate Logic
+    useEffect(() => {
+        const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
+        if (!segmentData) return;
+
+        if (isTopSlotActive && topSlotSegment === selectedSegment) {
+            const multiplierValue = parseInt(topSlotMultiplier, 10) || 0;
+            if (segmentData.type === 'number') {
+                setFinalPayout(multiplierValue.toString());
+            } else {
+                setFinalPayout('');
+            }
         } else {
-            setMultiplier('');
+            if (segmentData.type === 'number') {
+                setFinalPayout(segmentData.baseMultiplier.toString());
+            } else {
+                setFinalPayout('');
+            }
         }
-    };
+    }, [selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // 2. Strongly typed event handler
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!selectedSegment || !multiplier) return;
+
+        // Ensure finalPayout is a valid number before sending
+        const parsedMultiplier = parseInt(finalPayout || '0', 10);
+        if (!selectedSegment || parsedMultiplier <= 0) return;
 
         setIsSubmitting(true);
         try {
             await api.post('/spins', {
                 userEmail: "architect@pralayantaka.com",
                 gameType: "Crazy Time",
-                finalMultiplier: parseInt(multiplier),
-                result: selectedSegment, // Now sending the exact segment name
+                finalMultiplier: parsedMultiplier,
+                result: selectedSegment,
             });
 
-            // Reset to defaults after successful log
             setSelectedSegment('1');
-            setMultiplier('1');
+            setIsTopSlotActive(false);
         } catch (error) {
             console.error('Error saving spin:', error);
         } finally {
@@ -54,48 +87,110 @@ export default function SpinForm() {
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 bg-slate-800/40 backdrop-blur-md rounded-2xl border border-slate-700 shadow-xl">
 
-            {/* Control Pad Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Top Slot Engine Container */}
+            <div className="bg-slate-900/80 rounded-xl p-4 border border-slate-700/80">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                        Top Slot Engine
+                    </h3>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={isTopSlotActive}
+                            onChange={() => setIsTopSlotActive(!isTopSlotActive)}
+                        />
+                        <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                </div>
+
+                {isTopSlotActive && (
+                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <select
+                            value={topSlotSegment}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) => setTopSlotSegment(e.target.value)}
+                            className="bg-slate-800 border border-slate-600 text-white p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none font-bold"
+                        >
+                            {SEGMENTS.map(s => <option key={`ts-${s.name}`} value={s.name}>{s.name}</option>)}
+                        </select>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={topSlotMultiplier}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setTopSlotMultiplier(e.target.value)}
+                                className="w-full bg-slate-800 border border-slate-600 text-yellow-400 p-3 pl-4 pr-8 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none font-black"
+                                placeholder="Multiplier"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-500 font-bold">x</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Visual Wheel Segments */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {SEGMENTS.map((segment) => {
                     const isActive = selectedSegment === segment.name;
                     return (
                         <button
                             key={segment.name}
                             type="button"
-                            onClick={() => handleSegmentSelect(segment)}
-                            className={`py-3 px-2 rounded-xl border-2 transition-all duration-200 font-bold text-sm uppercase tracking-wider 
-                                ${isActive ? segment.activeColor : segment.defaultColor}
-                                ${isActive ? 'transform scale-[1.02]' : 'opacity-80 hover:opacity-100'}
+                            onClick={() => setSelectedSegment(segment.name)}
+                            className={`relative overflow-hidden group rounded-xl border-2 transition-all duration-300 h-24 flex items-center justify-center bg-slate-900
+                                ${isActive ? `${segment.color} shadow-[0_0_20px_rgba(0,0,0,0.5)] ${segment.shadow} scale-105` : 'border-slate-700/50 hover:border-slate-500 hover:scale-[1.02]'}
                             `}
                         >
-                            {segment.name}
+                            <div className="z-10 absolute inset-0 p-2 flex items-center justify-center">
+                                <Image
+                                    src={`/images/${segment.id}.png`}
+                                    alt={segment.name}
+                                    fill
+                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                    className={`object-contain transition-transform duration-300 ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}
+                                    onError={(e) => {
+                                        // 3. Safely cast the event target to satisfy TypeScript
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                    }}
+                                />
+                                <span className="font-black text-xl tracking-wider text-slate-400 group-hover:text-white uppercase drop-shadow-lg text-center z-0">
+                                    {segment.name}
+                                </span>
+                            </div>
+
+                            {isTopSlotActive && topSlotSegment === segment.name && (
+                                <div className="absolute top-1 right-1 bg-yellow-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full z-20 shadow-lg animate-bounce">
+                                    {topSlotMultiplier}x
+                                </div>
+                            )}
                         </button>
                     );
                 })}
             </div>
 
-            {/* Input & Submit Row */}
+            {/* Payout & Submit */}
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                <div className="relative flex-1">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">Payout:</span>
+                <div className="relative flex-1 group">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold tracking-widest uppercase text-sm">Payout</span>
                     <input
                         type="number"
-                        value={multiplier}
-                        onChange={(e) => setMultiplier(e.target.value)}
-                        placeholder="Enter Final Multiplier"
-                        className="w-full bg-slate-900 border-2 border-slate-700 text-white p-4 pl-20 rounded-xl focus:outline-none focus:border-blue-500 transition-colors font-black text-xl"
+                        value={finalPayout}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setFinalPayout(e.target.value)}
+                        placeholder="0"
+                        className="w-full bg-slate-900/80 border-2 border-slate-700 text-white p-4 pl-24 rounded-xl focus:outline-none focus:border-blue-500 transition-colors font-black text-2xl tracking-tighter"
                         required
                         min="1"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">x</span>
+                    <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xl">x</span>
                 </div>
 
                 <button
                     type="submit"
-                    disabled={isSubmitting || !multiplier}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-10 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 whitespace-nowrap"
+                    disabled={isSubmitting || !finalPayout}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black uppercase tracking-widest py-4 px-10 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 whitespace-nowrap"
                 >
-                    {isSubmitting ? 'Transmitting...' : 'Log Spin Data'}
+                    {isSubmitting ? 'Transmitting...' : 'Log Result'}
                 </button>
             </div>
         </form>
