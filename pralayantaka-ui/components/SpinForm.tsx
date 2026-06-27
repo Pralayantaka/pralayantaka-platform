@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { useState, useMemo, FormEvent, ChangeEvent } from 'react';
 import { api } from '../lib/api';
 import Image from 'next/image';
 
@@ -48,13 +48,11 @@ export default function SpinForm() {
     const [ctGreen, setCtGreen] = useState<string>('');
     const [ctBlue, setCtBlue] = useState<string>('');
     const [ctYellow, setCtYellow] = useState<string>('');
-
-    const [finalCalculatedMultiplier, setFinalCalculatedMultiplier] = useState<number>(1);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-    useEffect(() => {
+    const finalCalculatedMultiplier = useMemo(() => {
         const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
-        if (!segmentData) return;
+        if (!segmentData) return 1;
 
         let eventual = 0;
 
@@ -77,7 +75,7 @@ export default function SpinForm() {
             eventual = players > 0 ? Math.round(win / players) : 0;
         }
 
-        setFinalCalculatedMultiplier(eventual);
+        return eventual;
     }, [selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, numPayout, cfRed, cfBlue, cfWinner, pchEventual, crowdTotalWin, crowdPlayers]);
 
     const buildGameSpecificData = () => {
@@ -288,7 +286,7 @@ export default function SpinForm() {
                         </div>
                         <div className="flex items-center gap-4 bg-slate-800 p-3 rounded-lg">
                             <label htmlFor="cf-winner" className="text-slate-200 font-bold">Winning Side:</label>
-                            <select id="cf-winner" value={cfWinner} onChange={(e: any) => setCfWinner(e.target.value)} className={`flex-1 p-2 rounded font-black focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${cfWinner === 'Red' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
+                            <select id="cf-winner" value={cfWinner} onChange={(e: ChangeEvent<HTMLSelectElement>) => setCfWinner(e.target.value as 'Red' | 'Blue')} className={`flex-1 p-2 rounded font-black focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${cfWinner === 'Red' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
                                 <option value="Red">RED</option>
                                 <option value="Blue">BLUE</option>
                             </select>

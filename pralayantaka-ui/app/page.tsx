@@ -19,7 +19,7 @@ import PayoutMomentumChart from '../components/PayoutMomentumChart';
 export default function Home() {
     const [activeTab, setActiveTab] = useState<'Entry' | 'Analytics' | 'Database'>('Entry');
 
-    const { data, isLoading, isError, isFetching } = useQuery<SpinRecord[]>({
+    const { data, isLoading, isError } = useQuery<SpinRecord[]>({
         queryKey: ['spins'],
         queryFn: async () => (await api.get('/spins')).data,
         refetchInterval: 2000,
@@ -96,7 +96,7 @@ export default function Home() {
                         <h1 className="text-xl font-bold font-['Cinzel'] text-yellow-500">PRALAYANTAKA</h1>
                         <select 
                             value={activeTab} 
-                            onChange={(e) => setActiveTab(e.target.value as any)}
+                            onChange={(e) => setActiveTab(e.target.value as 'Entry' | 'Analytics' | 'Database')}
                             className="bg-slate-800 text-sm border-none rounded-lg py-2 px-4 outline-none font-bold text-white"
                         >
                             <option value="Entry">Spin Entry</option>
@@ -125,7 +125,7 @@ export default function Home() {
                                 <div className="space-y-10">
                                     <div className="text-center pb-6 border-b border-slate-800/50">
                                         <h1 className="font-['Cinzel'] text-4xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-amber-600 drop-shadow-xl mb-3">
-                                            PRALAYANTAKA'S EXPERIMENT
+                                            PRALAYANTAKA&apos;S EXPERIMENT
                                         </h1>
                                         <p className="text-slate-400 tracking-[0.2em] font-medium text-sm">DECONSTRUCTING THE ILLUSION OF TIME</p>
                                     </div>

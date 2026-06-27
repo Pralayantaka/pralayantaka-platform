@@ -62,7 +62,7 @@ export default function BonusGameStats({ data }: BonusGameStatsProps) {
                     ctSumBlue += (ct.blueFlap || 0);
                     ctSumYellow += (ct.yellowFlap || 0);
                 }
-            } catch (e) {
+            } catch {
                 // Ignore parse errors
             }
         });
