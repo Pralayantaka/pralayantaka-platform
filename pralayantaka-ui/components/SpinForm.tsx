@@ -247,9 +247,6 @@ export default function SpinForm() {
                                         className={`object-contain transition-transform duration-300 ${isActive ? 'scale-110' : 'opacity-60 group-hover:opacity-100'}`}
                                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
-                                    <span className="font-black text-lg tracking-wider text-slate-300 group-hover:text-white uppercase drop-shadow-lg text-center z-0" aria-hidden="true">
-                                        {segment.name}
-                                    </span>
                                 </div>
                             </button>
                         );
