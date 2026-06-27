@@ -7,9 +7,19 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// 1. Configure PostgreSQL Connection (env var takes priority over appsettings)
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? builder.Configuration.GetConnectionString("CoreConnection");
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres"))
+{
+    // Parse Railway's postgres:// or postgresql:// URL
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Disable;";
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("CoreConnection");
+}
+
 builder.Services.AddDbContext<CoreDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -41,4 +51,21 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 app.MapControllers();
+
+// 4. Automatically apply database migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<CoreDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred migrating the DB.");
+    }
+}
+
 app.Run();
