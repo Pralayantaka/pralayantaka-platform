@@ -34,7 +34,6 @@ export default function SpinForm() {
     const [selectedSegment, setSelectedSegment] = useState<string>('1');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    const [numPayout, setNumPayout] = useState<string>('1');
     const [cfRed, setCfRed] = useState<string>('');
     const [cfBlue, setCfBlue] = useState<string>('');
     const [cfWinner, setCfWinner] = useState<'Red' | 'Blue'>('Red');
@@ -63,7 +62,6 @@ export default function SpinForm() {
                 setIsTopSlotActive(parsed.isTopSlotActive || false);
                 setTopSlotSegment(parsed.topSlotSegment || '1');
                 setTopSlotMultiplier(parsed.topSlotMultiplier || '');
-                setNumPayout(parsed.numPayout || '1');
                 setCfRed(parsed.cfRed || '');
                 setCfBlue(parsed.cfBlue || '');
                 setCfWinner(parsed.cfWinner || 'Red');
@@ -86,20 +84,19 @@ export default function SpinForm() {
         if (autoSave) {
             const draft = {
                 selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier,
-                numPayout, cfRed, cfBlue, cfWinner, pchHighest, pchEventual,
+                cfRed, cfBlue, cfWinner, pchHighest, pchEventual,
                 crowdTotalWin, crowdPlayers, chHighest, ctGreen, ctBlue, ctYellow
             };
             localStorage.setItem('pralayantaka_draft', JSON.stringify(draft));
         } else {
             localStorage.removeItem('pralayantaka_draft');
         }
-    }, [autoSave, selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, numPayout, cfRed, cfBlue, cfWinner, pchHighest, pchEventual, crowdTotalWin, crowdPlayers, chHighest, ctGreen, ctBlue, ctYellow]);
+    }, [autoSave, selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, cfRed, cfBlue, cfWinner, pchHighest, pchEventual, crowdTotalWin, crowdPlayers, chHighest, ctGreen, ctBlue, ctYellow]);
 
     const handleClearEntry = () => {
         setSelectedSegment('1');
         setIsTopSlotActive(false);
         setTopSlotMultiplier('');
-        setNumPayout('1');
         setCfRed(''); setCfBlue('');
         setPchHighest(''); setPchEventual('');
         setCrowdTotalWin(''); setCrowdPlayers(''); setChHighest('');
@@ -114,29 +111,26 @@ export default function SpinForm() {
         const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
         if (!segmentData) return 1;
 
-        let eventual = 0;
-
         if (segmentData.type === 'number') {
             if (isTopSlotActive && topSlotSegment === selectedSegment && topSlotMultiplier) {
-                eventual = parseInt(topSlotMultiplier, 10);
-            } else {
-                eventual = parseInt(numPayout, 10) || segmentData.baseMultiplier;
+                return parseInt(topSlotMultiplier, 10) * segmentData.baseMultiplier;
             }
+            return segmentData.baseMultiplier;
         }
         else if (segmentData.type === 'coin-flip') {
-            eventual = parseInt(cfWinner === 'Red' ? cfRed : cfBlue, 10) || 0;
+            return parseInt(cfWinner === 'Red' ? cfRed : cfBlue, 10) || 0;
         }
         else if (segmentData.type === 'pachinko') {
-            eventual = parseInt(pchEventual, 10) || 0;
+            return parseInt(pchEventual, 10) || 0;
         }
         else if (segmentData.type === 'cash-hunt' || segmentData.type === 'crazy-time') {
             const win = parseFloat(crowdTotalWin) || 0;
             const players = parseFloat(crowdPlayers) || 1;
-            eventual = players > 0 ? Math.round(win / players) : 0;
+            return players > 0 ? Math.round(win / players) : 0;
         }
 
-        return eventual;
-    }, [selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, numPayout, cfRed, cfBlue, cfWinner, pchEventual, crowdTotalWin, crowdPlayers]);
+        return 0;
+    }, [selectedSegment, isTopSlotActive, topSlotSegment, topSlotMultiplier, cfRed, cfBlue, cfWinner, pchEventual, crowdTotalWin, crowdPlayers]);
 
     const buildGameSpecificData = () => {
         const segmentData = SEGMENTS.find(s => s.name === selectedSegment);
@@ -404,27 +398,13 @@ export default function SpinForm() {
                 </div>
             </fieldset>
 
-            {/* STEP 4: Dynamic Resolution Board */}
-            <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner mt-6">
-                <legend className="sr-only">Step 4: Outcome Resolution Configuration</legend>
-                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 4: Outcome Resolution</h3>
+            {/* STEP 4: Dynamic Resolution Board (Bonuses Only) */}
+            {currentSegmentType !== 'number' && (
+                <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner mt-6">
+                    <legend className="sr-only">Step 4: Outcome Resolution Configuration</legend>
+                    <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-4" aria-hidden="true">Step 4: Bonus Resolution</h3>
 
-                {/* Logic 1: Numbers */}
-                {currentSegmentType === 'number' && (
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <label htmlFor="num-payout" className="text-slate-200 font-bold w-1/3">Eventual Multiplier</label>
-                            <input id="num-payout" type="number" value={numPayout} onChange={e => setNumPayout(e.target.value)} className="flex-1 bg-slate-800 border border-slate-600 text-white p-3 rounded-lg font-black text-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" />
-                        </div>
-                        <div className="flex flex-wrap justify-end gap-2">
-                            {[1, 2, 5, 10, 20, 50, 100].map(val => (
-                                <button key={`num-payout-${val}`} type="button" onClick={() => setNumPayout(String(val))} className="bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-bold py-1.5 px-3 rounded border border-slate-600 hover:border-blue-500 transition-colors">{val}x</button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Logic 2: Coin Flip */}
+                    {/* Logic 2: Coin Flip */}
                 {currentSegmentType === 'coin-flip' && (
                     <div className="space-y-4">
                         <div className="flex gap-4">
@@ -490,7 +470,8 @@ export default function SpinForm() {
                         </div>
                     </div>
                 )}
-            </fieldset>
+                </fieldset>
+            )}
 
             {/* Submission Block */}
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
