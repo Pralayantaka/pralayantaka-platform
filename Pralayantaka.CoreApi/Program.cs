@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // 3. Apply the updated CORS policy
 app.UseCors("AllowAll");
