@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { FileEdit, LineChart, Database, UserCog } from 'lucide-react';
 import { api } from '../lib/api';
 import type { SpinRecord } from '../lib/types';
 import SpinForm from '../components/SpinForm';
@@ -18,11 +19,14 @@ import PayoutMomentumChart from '../components/PayoutMomentumChart';
 export default function Home() {
     const [activeTab, setActiveTab] = useState<'Entry' | 'Analytics' | 'Database'>('Entry');
 
-    const { data, isLoading } = useQuery<SpinRecord[]>({
+    const { data, isLoading, isError, isFetching } = useQuery<SpinRecord[]>({
         queryKey: ['spins'],
         queryFn: async () => (await api.get('/spins')).data,
         refetchInterval: 2000,
     });
+
+    // Only show full page spinner on initial load when there's no data.
+    const isInitialLoading = isLoading && !data;
 
     return (
         <div className="flex h-screen bg-[#0F111A] text-slate-200 font-sans selection:bg-blue-500/30 overflow-hidden">
@@ -44,7 +48,7 @@ export default function Home() {
                                 activeTab === 'Entry' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                             }`}
                         >
-                            <span className="text-lg">📝</span> Spin Entry
+                            <FileEdit className="w-5 h-5" /> Spin Entry
                         </button>
                         <button 
                             onClick={() => setActiveTab('Analytics')}
@@ -52,7 +56,7 @@ export default function Home() {
                                 activeTab === 'Analytics' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                             }`}
                         >
-                            <span className="text-lg">📈</span> Market Intelligence
+                            <LineChart className="w-5 h-5" /> Market Intelligence
                         </button>
                         <button 
                             onClick={() => setActiveTab('Database')}
@@ -60,15 +64,15 @@ export default function Home() {
                                 activeTab === 'Database' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                             }`}
                         >
-                            <span className="text-lg">🗄️</span> Raw Database
+                            <Database className="w-5 h-5" /> Raw Database
                         </button>
                     </nav>
                 </div>
                 
                 <div className="p-6 border-t border-slate-800/50">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                            <span className="text-sm">👑</span>
+                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300">
+                            <UserCog className="w-4 h-4" />
                         </div>
                         <div>
                             <p className="text-xs font-bold text-white">Admin Access</p>
@@ -95,13 +99,21 @@ export default function Home() {
                             onChange={(e) => setActiveTab(e.target.value as any)}
                             className="bg-slate-800 text-sm border-none rounded-lg py-2 px-4 outline-none font-bold text-white"
                         >
-                            <option value="Entry">📝 Spin Entry</option>
-                            <option value="Analytics">📈 Intelligence</option>
-                            <option value="Database">🗄️ Database</option>
+                            <option value="Entry">Spin Entry</option>
+                            <option value="Analytics">Intelligence</option>
+                            <option value="Database">Database</option>
                         </select>
                     </div>
 
-                    {isLoading ? (
+                    {/* Network Status Indicator */}
+                    {isError && (
+                        <div className="mb-6 p-3 bg-red-900/30 border border-red-500/30 rounded-lg text-red-400 text-sm font-bold flex items-center justify-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            Live Feed Disconnected. Retrying...
+                        </div>
+                    )}
+
+                    {isInitialLoading ? (
                         <div className="flex justify-center py-32">
                             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
