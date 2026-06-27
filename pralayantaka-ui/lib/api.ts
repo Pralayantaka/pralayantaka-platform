@@ -1,4 +1,9 @@
 import axios from 'axios';
+
 export const api = axios.create({
-  baseURL: 'http://localhost:5027/api',
+    // Replace with your actual Railway URL
+    baseURL: 'https://pralayantaka-platform-production.up.railway.app',
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });

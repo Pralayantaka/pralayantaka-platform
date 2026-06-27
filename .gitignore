@@ -6,6 +6,11 @@
 # dotenv files
 .env
 
+# AI Development Tools (Copilot, Claude)
+.agents/
+.claude/
+skills-lock.json
+
 # User-specific files
 *.rsuser
 *.suo
