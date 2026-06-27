@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FileEdit, LineChart, Database, UserCog } from 'lucide-react';
+import { FileEdit, LineChart, Database, UserCog, Settings, Heart, Globe, MessageCircle, Terminal } from 'lucide-react';
 import { api } from '../lib/api';
 import type { SpinRecord } from '../lib/types';
 import SpinForm from '../components/SpinForm';
@@ -91,19 +91,37 @@ export default function Home() {
                 
                 <div className="max-w-7xl mx-auto p-6 md:p-10">
                     
-                    {/* Mobile Header */}
-                    <div className="md:hidden flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
-                        <h1 className="text-xl font-bold font-['Cinzel'] text-yellow-500">PRALAYANTAKA</h1>
-                        <select 
-                            value={activeTab} 
-                            onChange={(e) => setActiveTab(e.target.value as 'Entry' | 'Analytics' | 'Database')}
-                            className="bg-slate-800 text-sm border-none rounded-lg py-2 px-4 outline-none font-bold text-white"
-                        >
-                            <option value="Entry">Spin Entry</option>
-                            <option value="Analytics">Intelligence</option>
-                            <option value="Database">Database</option>
-                        </select>
-                    </div>
+                    {/* Global Top Header */}
+                    <header className="flex flex-col md:flex-row items-center justify-between mb-8 pb-4 border-b border-slate-800 gap-4">
+                        <div className="flex items-center justify-between w-full md:w-auto">
+                            <h1 className="text-xl font-bold font-['Cinzel'] text-yellow-500 md:hidden">PRALAYANTAKA</h1>
+                            <div className="md:hidden">
+                                <select 
+                                    value={activeTab} 
+                                    onChange={(e) => setActiveTab(e.target.value as 'Entry' | 'Analytics' | 'Database')}
+                                    className="bg-slate-800 text-sm border-none rounded-lg py-2 px-4 outline-none font-bold text-white"
+                                >
+                                    <option value="Entry">Spin Entry</option>
+                                    <option value="Analytics">Intelligence</option>
+                                    <option value="Database">Database</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Professional Action Section */}
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+                            <button className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-full text-sm font-bold transition-colors border border-rose-500/20">
+                                <Heart className="w-4 h-4" /> Support Project
+                            </button>
+                            <div className="h-6 w-px bg-slate-700 hidden md:block"></div>
+                            <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors" aria-label="Settings">
+                                <Settings className="w-5 h-5" />
+                            </button>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-sm font-bold transition-colors border border-slate-600">
+                                <UserCog className="w-4 h-4" /> Account
+                            </button>
+                        </div>
+                    </header>
 
                     {/* Network Status Indicator */}
                     {isError && (
@@ -223,6 +241,26 @@ export default function Home() {
                         </div>
                     )}
                 </div>
+                
+                {/* Global Footer */}
+                <footer className="border-t border-slate-800/60 bg-slate-900/20 backdrop-blur-sm mt-auto w-full">
+                    <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="text-slate-500 text-sm font-medium">
+                            &copy; {new Date().getFullYear()} Pralayantaka Analytics. All rights reserved.
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <a href="#" className="text-slate-500 hover:text-blue-400 transition-colors" aria-label="Twitter">
+                                <Globe className="w-5 h-5" />
+                            </a>
+                            <a href="#" className="text-slate-500 hover:text-indigo-400 transition-colors" aria-label="Discord">
+                                <MessageCircle className="w-5 h-5" />
+                            </a>
+                            <a href="#" className="text-slate-500 hover:text-white transition-colors" aria-label="GitHub">
+                                <Terminal className="w-5 h-5" />
+                            </a>
+                        </div>
+                    </div>
+                </footer>
             </main>
         </div>
     );
