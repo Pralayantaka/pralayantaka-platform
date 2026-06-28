@@ -63,6 +63,9 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
+// Add a root health check endpoint for Railway/Load Balancers
+app.MapGet("/", () => Results.Ok(new { status = "healthy", message = "Pralayantaka Core API is running" }));
+
 // 4. Automatically apply database migrations on startup
 using (var scope = app.Services.CreateScope())
 {
