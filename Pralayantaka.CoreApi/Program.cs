@@ -67,19 +67,19 @@ app.MapControllers();
 app.MapGet("/", () => Results.Ok(new { status = "healthy", message = "Pralayantaka Core API is running" }));
 
 // 4. Automatically apply database migrations on startup
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<CoreDbContext>();
-        context.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred migrating the DB.");
-    }
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     try
+//     {
+//         var context = services.GetRequiredService<CoreDbContext>();
+//         context.Database.Migrate();
+//     }
+//     catch (Exception ex)
+//     {
+//         var logger = services.GetRequiredService<ILogger<Program>>();
+//         logger.LogError(ex, "An error occurred migrating the DB.");
+//     }
+// }
 
 app.Run();
