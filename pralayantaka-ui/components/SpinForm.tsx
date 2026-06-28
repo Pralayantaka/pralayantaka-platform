@@ -455,17 +455,10 @@ export default function SpinForm() {
             )}
 
             {/* STEP 4: Global Engagement Metrics */}
-            <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner mt-6">
+            <fieldset className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-inner mt-6 flex flex-col">
                 <legend className="sr-only">Step 4: Global Engagement Metrics Configuration</legend>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4">
                     <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest" aria-hidden="true">Step 4: Global Engagement Metrics</h3>
-                    <button 
-                        type="button" 
-                        onClick={() => setIsNegativeAdjust(!isNegativeAdjust)} 
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors border ${isNegativeAdjust ? 'bg-red-900/40 text-red-400 border-red-500/30' : 'bg-blue-900/40 text-blue-400 border-blue-500/30'}`}
-                    >
-                        <span>[+/-] Flip to {isNegativeAdjust ? 'Subtract' : 'Add'}</span>
-                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -477,8 +470,8 @@ export default function SpinForm() {
                         </div>
                         <input id="global-players" type="number" value={crowdPlayers} onChange={e => setCrowdPlayers(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-blue-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none mb-3" placeholder="e.g. 5240" />
                         <div className="flex flex-wrap gap-2">
-                            {[500, 1000, 2000, 5000, 10000].map(val => (
-                                <button key={`p-${val}`} type="button" onClick={() => setCrowdPlayers(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border-blue-800/50'} text-xs font-bold py-1.5 px-3 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{val >= 1000 ? `${val/1000}k` : val}</button>
+                            {[10, 50, 100, 500, 1000, 5000].map(val => (
+                                <button key={`p-${val}`} type="button" onClick={() => setCrowdPlayers(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border-blue-800/50'} text-xs font-bold py-1.5 px-2 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{val >= 1000 ? `${val/1000}k` : val}</button>
                             ))}
                         </div>
                     </div>
@@ -491,16 +484,27 @@ export default function SpinForm() {
                         </div>
                         <input id="global-total-win" type="number" value={crowdTotalWin} onChange={e => setCrowdTotalWin(e.target.value)} className="w-full bg-slate-900 border border-slate-600 text-emerald-400 p-3 rounded-lg font-bold focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none mb-3" placeholder="e.g. 250000" />
                         <div className="flex flex-wrap gap-2">
-                            {[100000, 500000, 1000000, 5000000, 10000000].map(val => {
+                            {[10000, 50000, 100000, 500000, 1000000, 5000000, 10000000].map(val => {
                                 let label = val.toString();
                                 if (val === 10000000) label = '1Cr';
                                 else if (val >= 100000) label = `${val/100000}L`;
+                                else if (val >= 1000) label = `${val/1000}k`;
                                 return (
-                                    <button key={`w-${val}`} type="button" onClick={() => setCrowdTotalWin(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-emerald-900/30 hover:bg-emerald-800/50 text-emerald-300 border-emerald-800/50'} text-xs font-bold py-1.5 px-3 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{label}</button>
+                                    <button key={`w-${val}`} type="button" onClick={() => setCrowdTotalWin(prev => String(Math.max(0, (parseInt(prev)||0) + (isNegativeAdjust ? -val : val))))} className={`${isNegativeAdjust ? 'bg-red-900/30 hover:bg-red-800/50 text-red-300 border-red-800/50' : 'bg-emerald-900/30 hover:bg-emerald-800/50 text-emerald-300 border-emerald-800/50'} text-xs font-bold py-1.5 px-2 rounded border transition-colors`}>{isNegativeAdjust ? '-' : '+'}{label}</button>
                                 );
                             })}
                         </div>
                     </div>
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                    <button 
+                        type="button" 
+                        onClick={() => setIsNegativeAdjust(!isNegativeAdjust)} 
+                        className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-colors border shadow-lg ${isNegativeAdjust ? 'bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-500/50' : 'bg-blue-900/40 hover:bg-blue-900/60 text-blue-400 border-blue-500/50'}`}
+                    >
+                        <span>[+/-] Flip to {isNegativeAdjust ? 'Subtract' : 'Add'}</span>
+                    </button>
                 </div>
             </fieldset>
 
