@@ -4,16 +4,28 @@ using Pralayantaka.CoreApi.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Force the app to listen on Railway's dynamic port
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var port = Environment.GetEnvironmentVariable("PORT");
+if (string.IsNullOrWhiteSpace(port)) port = "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres"))
+if (!string.IsNullOrWhiteSpace(connectionString) && connectionString.StartsWith("postgres"))
 {
-    // Parse Railway's postgres:// or postgresql:// URL
-    var uri = new Uri(connectionString);
-    var userInfo = uri.UserInfo.Split(':');
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SslMode=Require;Trust Server Certificate=true;";
+    try
+    {
+        // Parse Railway's postgres:// or postgresql:// URL
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = userInfo.Length > 0 ? userInfo[0] : "";
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        var dbPort = uri.Port > 0 ? uri.Port : 5432;
+        
+        connectionString = $"Host={uri.Host};Port={dbPort};Database={uri.LocalPath.TrimStart('/')};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true;";
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+    }
 }
 else
 {
@@ -21,7 +33,12 @@ else
 }
 
 builder.Services.AddDbContext<CoreDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        options.UseNpgsql(connectionString);
+    }
+});
 
 // 2. Configure CORS for Production Demo (Allows cloud frontend to connect)
 builder.Services.AddCors(options =>
@@ -35,14 +52,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
 //app.UseHttpsRedirection();
 
